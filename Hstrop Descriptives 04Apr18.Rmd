@@ -1,0 +1,106 @@
+---
+title: "High Sensitivity Troponin"
+author: "Ashley Snyder"
+date: "April 5, 2018"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    theme: united  # many options for theme, this one is my favorite.
+---
+
+```{r setup, include=FALSE}
+setwd("/Users/msis/Box Sync/MPrOVE Files/Projects/Chest Pain/")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Study Objectives
+
+1. To determine the characteristics of patients getting the high sensitivity troponing (hsTrop) test in the ED, excluding patients who are part of the chest pain cohort
+
+2. To assess the downstream impact of the hsTrop on ordering practices for patients not included in the chest pain cohort
+
+
+
+```{r, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(pastecs)
+setwd("/Users/msis/Box Sync/MPrOVE/Chest Pain Pathway/Data")
+allpatients <- read_excel("hstrop.xlsx", sheet = "Data")
+names(allpatients)[names(allpatients) == 'hstrop'] <- 'High Sensitivity Troponin'
+names(allpatients)[names(allpatients) == 'chest_pain_pt_flag'] <- 'Chest Pain Pathway'
+names(allpatients)[names(allpatients) == 'first_clin_imp'] <- 'First Clinical Impressions'
+names(allpatients)[names(allpatients) == 'hosp_dispo'] <- 'Hospital Discharge Disposition'
+names(allpatients)[names(allpatients) == 'har_final_1st_disch_dx'] <- 'Discharge Diagnosis'
+
+#Only patients with hstrop drawn
+hstrop = filter(allpatients, `High Sensitivity Troponin`==1)
+
+#Only patients who went through the chest pain pathway
+cp = filter(allpatients, `Chest Pain Pathway`==1)
+
+#Patients who had hstrop and NO chest pain pathway
+hstrop.nocp = filter(hstrop, `Chest Pain Pathway`==0)
+```
+
+# Determining the Population
+
+Cross-tabulation of patients who had a high sensitivity troponin drawn and those who went through the chest pain pathway
+
+
+```{r, echo=FALSE}
+tab = allpatients %>%
+  group_by(`High Sensitivity Troponin`, `Chest Pain Pathway`) %>%
+  summarize(n=n()) %>%
+  mutate(percent=100*(n/sum(n)))
+tab %>% knitr::kable()
+```
+
+From above, there are **n=1,044** (59.9%) patients who recieved hsTrop but did not go through the chest pain pathway. These are the current patients of interest.
+
+## Characterizing the Patient Population 
+
+
+###First Clinical Impressions on Arrival to the ED
+
+
+```{r, echo=FALSE}
+tab2 = hstrop.nocp %>%
+  group_by(`First Clinical Impressions`) %>%
+  summarize(n=n()) %>%
+  mutate(percent=100*(n/sum(n))) 
+tab3 <- tab2[order(-rank(tab2$percent)), ]
+tab3 %>% knitr::kable()
+```
+
+There is a lot of variation in admission diagnosis. Could we consider grouping these diagnoses into categories? 
+
+
+###Hospital Discharge Disposition
+
+
+```{r, echo=FALSE}
+tab4 = hstrop.nocp %>%
+  group_by(`Hospital Discharge Disposition`) %>%
+  summarize(n=n()) %>%
+  mutate(percent=100*(n/sum(n))) 
+tab5 <- tab4[order(-rank(tab4$percent)), ]
+tab5 %>% knitr::kable()
+```
+
+
+###Discharge Diagnosis
+
+
+```{r, echo=FALSE}
+tab4 = hstrop.nocp %>%
+  group_by(`Discharge Diagnosis`) %>%
+  summarize(n=n()) %>%
+  mutate(percent=100*(n/sum(n))) 
+tab5 <- tab4[order(-rank(tab4$percent)), ]
+tab5 %>% knitr::kable()
+```
+
+
