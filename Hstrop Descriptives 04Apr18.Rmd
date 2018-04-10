@@ -45,6 +45,14 @@ cp = filter(allpatients, `Chest Pain Pathway`==1)
 hstrop.nocp = filter(hstrop, `Chest Pain Pathway`==0)
 ```
 
+```{r ICD, echo=FALSE}
+# Commenting this but try (after updating variables names):
+#  allpatients = allpatients %>% 
+#       mutate( first_clin_imp_icd10_3 = stringr::str_sub(first_clin_imp_icd10, 1, 3) )
+# Then use this in the rollup.  If there is leading whitespace, use stringr::str_trim() first.
+
+```
+
 # Determining the Population
 
 Cross-tabulation of patients who had a high sensitivity troponin drawn and those who went through the chest pain pathway
@@ -54,7 +62,7 @@ Cross-tabulation of patients who had a high sensitivity troponin drawn and those
 tab = allpatients %>%
   group_by(`High Sensitivity Troponin`, `Chest Pain Pathway`) %>%
   summarize(n=n()) %>%
-  mutate(percent=100*(n/sum(n)))
+  mutate(percent=sprintf('%4.1f', 100*(n/sum(n) ) ))
 tab %>% knitr::kable()
 ```
 
@@ -70,9 +78,10 @@ From above, there are **n=1,044** (59.9%) patients who recieved hsTrop but did n
 tab2 = hstrop.nocp %>%
   group_by(`First Clinical Impressions`) %>%
   summarize(n=n()) %>%
-  mutate(percent=100*(n/sum(n))) 
+  mutate(percent=sprintf('%4.1f', 100*(n/sum(n) ))) 
 tab3 <- tab2[order(-rank(tab2$percent)), ]
-tab3 %>% knitr::kable()
+#tab3 %>% knitr::kable()
+tabl3 %>% DT::datable()
 ```
 
 There is a lot of variation in admission diagnosis. Could we consider grouping these diagnoses into categories? 
@@ -85,9 +94,10 @@ There is a lot of variation in admission diagnosis. Could we consider grouping t
 tab4 = hstrop.nocp %>%
   group_by(`Hospital Discharge Disposition`) %>%
   summarize(n=n()) %>%
-  mutate(percent=100*(n/sum(n))) 
+  mutate(percent=sprintf('%4.1f', 100*(n/sum(n)) )) 
 tab5 <- tab4[order(-rank(tab4$percent)), ]
-tab5 %>% knitr::kable()
+#tab5 %>% knitr::kable()
+tab5 %>% DT::datatable()
 ```
 
 
@@ -98,9 +108,10 @@ tab5 %>% knitr::kable()
 tab4 = hstrop.nocp %>%
   group_by(`Discharge Diagnosis`) %>%
   summarize(n=n()) %>%
-  mutate(percent=100*(n/sum(n))) 
+  mutate(percent=sprintf('%4.1f', 100*(n/sum(n)) )) 
 tab5 <- tab4[order(-rank(tab4$percent)), ]
-tab5 %>% knitr::kable()
+#tab5 %>% knitr::kable()
+tab5 %>% DT::datatable()
 ```
 
 
